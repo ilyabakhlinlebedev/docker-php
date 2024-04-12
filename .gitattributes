@@ -1,3 +1,6 @@
 # Git
 .gitattributes export-ignore eol=lf text
 .gitignore export-ignore eol=lf text
+
+# Markdown
+*.md diff=markdown eol=lf text
