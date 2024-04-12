@@ -1,5 +1,5 @@
 Components: main
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-Suites: bookworm bookworm-updates
+Suites: bookworm-security
 Types: deb
-URIs: http://deb.debian.org/debian
+URIs: http://deb.debian.org/debian-security
