@@ -71,7 +71,7 @@ COPY --from=build-php /root/php-5.6.40/ /root/php-5.6.40/
 
 WORKDIR /root/php-5.6.40/
 
-RUN make install
+RUN make install-cli
 
 COPY --chmod=644 --chown=root:root /usr/local/etc/php.ini /usr/local/etc/php.ini
 
