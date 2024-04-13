@@ -17,8 +17,26 @@ jobs:
           if-no-files-found: "error"
           path: "${{ github.workspace }}/php-5.6.40.tar"
           retention-days: "1"
-  docker-push:
-    name: "docker push"
+  docker-build-php-7033:
+    name: "docker build php-7.0.33"
+    needs:
+      - "github-checkout"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/download-artifact@v4"
+        with:
+          name: "php"
+          path: "${{ github.workspace }}/php/"
+      - run: "docker build --tag ilyabakhlinlebedev/php:7.0.33 ./php/7.0.33/"
+      - run: "docker save --output ./php-7.0.33.tar ilyabakhlinlebedev/php:7.0.33"
+      - uses: "actions/upload-artifact@v4"
+        with:
+          name: "php-7.0.33.tar"
+          if-no-files-found: "error"
+          path: "${{ github.workspace }}/php-7.0.33.tar"
+          retention-days: "1"
+  docker-push-5640:
+    name: "docker push php-5.6.40"
     needs:
       - "docker-build-php-5640"
     runs-on: "ubuntu-latest"
@@ -29,6 +47,23 @@ jobs:
           path: "${{ github.workspace }}"
       - run: "docker load --input ./php-5.6.40.tar"
       - run: "docker tag ilyabakhlinlebedev/php:5.6.40 ilyabakhlinlebedev/php:5.6"
+      - uses: "docker/login-action@v3"
+        with:
+          username: "${{ secrets.DOCKER_HUB_USERNAME }}"
+          password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+      - run: "docker push --all-tags --quiet ilyabakhlinlebedev/php"
+  docker-push-7033:
+    name: "docker push php-7.0.33"
+    needs:
+      - "docker-build-php-7033"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/download-artifact@v4"
+        with:
+          name: "php-7.0.33.tar"
+          path: "${{ github.workspace }}"
+      - run: "docker load --input ./php-7.0.33.tar"
+      - run: "docker tag ilyabakhlinlebedev/php:7.0.33 ilyabakhlinlebedev/php:7.0"
       - uses: "docker/login-action@v3"
         with:
           username: "${{ secrets.DOCKER_HUB_USERNAME }}"
@@ -50,4 +85,6 @@ on:
   push:
     branches:
       - "pro"
+  schedule:
+    - cron: "0 8 * * 0"
 run-name: "The so called run-name..."
