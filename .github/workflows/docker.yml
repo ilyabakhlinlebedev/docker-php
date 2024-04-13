@@ -1,0 +1,53 @@
+jobs:
+  docker-build-php-5640:
+    name: "docker build php-5.6.40"
+    needs:
+      - "github-checkout"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/download-artifact@v4"
+        with:
+          name: "php"
+          path: "${{ github.workspace }}/php/"
+      - run: "docker build --tag ilyabakhlinlebedev/php:5.6.40 ./php/5.6.40/"
+      - run: "docker save --output ./php-5.6.40.tar ilyabakhlinlebedev/php:5.6.40"
+      - uses: "actions/upload-artifact@v4"
+        with:
+          name: "php-5.6.40.tar"
+          if-no-files-found: "error"
+          path: "${{ github.workspace }}/php-5.6.40.tar"
+          retention-days: "1"
+  docker-push:
+    name: "docker push"
+    needs:
+      - "docker-build-php-5640"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/download-artifact@v4"
+        with:
+          name: "php-5.6.40.tar"
+          path: "${{ github.workspace }}"
+      - run: "docker load --input ./php-5.6.40.tar"
+      - run: "docker tag ilyabakhlinlebedev/php:5.6.40 ilyabakhlinlebedev/php:5.6"
+      - uses: "docker/login-action@v3"
+        with:
+          username: "${{ secrets.DOCKER_HUB_USERNAME }}"
+          password: "${{ secrets.DOCKER_HUB_PASSWORD }}"
+      - run: "docker push --all-tags --quiet ilyabakhlinlebedev/php"
+  github-checkout:
+    name: "github checkout"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/upload-artifact@v4"
+        with:
+          name: "php"
+          if-no-files-found: "error"
+          path: "${{ github.workspace }}/php/"
+          retention-days: "1"
+name: "Name of the workflow."
+on:
+  push:
+    branches:
+      - "pro"
+run-name: "The so called run-name..."

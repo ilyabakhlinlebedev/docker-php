@@ -13,3 +13,6 @@ Dockerfile eol=lf text
 
 # PHP
 *.ini eol=lf text
+
+# YAML
+*.yml text eol=lf
