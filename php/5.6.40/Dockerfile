@@ -53,6 +53,8 @@ RUN ./configure \
     --disable-all \
     --disable-cgi \
     --prefix=/usr/local \
+    --with-config-file-path=/usr/local/etc \
+    --with-config-file-scan-dir=/usr/local/etc/ext \
     --with-readline
 
 RUN make -j 4
@@ -70,6 +72,10 @@ COPY --from=build-php /root/php-5.6.40/ /root/php-5.6.40/
 WORKDIR /root/php-5.6.40/
 
 RUN make install
+
+COPY --chmod=644 --chown=root:root /usr/local/etc/php.ini /usr/local/etc/php.ini
+
+RUN mkdir -m 755 -v /usr/local/etc/ext
 
 FROM base AS main
 
