@@ -4,12 +4,14 @@
 
 ### Dependencies Build ###
 
+- Added the 7.52.1 version of the [`curl`](https://curl.se/) library.
 - Added the 1.0.2q version of the [`openssl`](https://www.openssl.org/) library.
 - Added the 1.2.13 version of the [`zlib`](https://www.zlib.net/) library.
 
 ### PHP ###
 
 - Added the following extensions:
+    - `curl`
     - `filter`
     - `hash`
     - `json`

@@ -38,7 +38,7 @@ RUN wget -O - -q https://www.openssl.org/source/old/1.0.2/openssl-1.0.2q.tar.gz 
 
 WORKDIR /root/openssl-1.0.2q/
 
-RUN ./config --openssldir=/usr/local --prefix=/usr/local && make && make install
+RUN ./config -fPIC --openssldir=/usr/local --prefix=/usr/local && make && make install
 
 FROM build AS build-readline
 
@@ -56,8 +56,20 @@ WORKDIR /root/zlib-1.2.13/
 
 RUN ./configure --prefix=/usr/local && make && make install
 
+FROM build AS build-curl
+
+COPY --from=build-openssl /usr/local/ /usr/local/
+COPY --from=build-zlib /usr/local/ /usr/local/
+
+RUN wget -O - -q https://curl.se/download/curl-7.52.1.tar.gz | tar -C /root/ -o -v -x -z
+
+WORKDIR /root/curl-7.52.1/
+
+RUN ./configure --prefix=/usr/local --with-ssl --with-zlib && make && make install
+
 FROM build AS build-php
 
+COPY --from=build-curl /usr/local/ /usr/local/
 COPY --from=build-ncurses /usr/local/ /usr/local/
 COPY --from=build-openssl /usr/local/ /usr/local/
 COPY --from=build-readline /usr/local/ /usr/local/
@@ -78,19 +90,23 @@ RUN ./configure \
     --prefix=/usr/local \
     --with-config-file-path=/usr/local/etc \
     --with-config-file-scan-dir=/usr/local/etc/ext \
+    --with-curl \
     --with-readline \
     --with-openssl \
     --with-zlib
 
-RUN make -j 4
+RUN make
 
 FROM build AS install-php
 
+COPY --from=build-php /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so.4.4.0
 COPY --from=build-php /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8.2
 
-RUN ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8
+RUN ln -s -v /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so.4 \
+    && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8
 
-RUN ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so
+RUN ln -s -v /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so \
+    && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so
 
 COPY --from=build-php /root/php-5.6.40/ /root/php-5.6.40/
 
