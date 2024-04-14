@@ -1,3 +1,24 @@
+# 1.1.0 #
+
+## Added ##
+
+### Dependencies Build ###
+
+- Added the 1.0.2q version of the [`openssl`](https://www.openssl.org/) library.
+- Added the 1.2.13 version of the [`zlib`](https://www.zlib.net/) library.
+
+### PHP ###
+
+- Added the following extensions:
+    - `filter`
+    - `hash`
+    - `json`
+    - `mbstring`
+    - `phar`
+    - `openssl`
+    - `zlib`
+- Added the installation of the Composer dependency manager.
+
 # 1.0.0 #
 
 ## Added ##

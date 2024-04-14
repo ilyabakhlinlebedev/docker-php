@@ -32,6 +32,14 @@ WORKDIR /root/ncurses-6.4/
 
 RUN ./configure --prefix=/usr/local && make && make install
 
+FROM build AS build-openssl
+
+RUN wget -O - -q https://www.openssl.org/source/old/1.0.2/openssl-1.0.2q.tar.gz | tar -C /root/ -o -v -x -z
+
+WORKDIR /root/openssl-1.0.2q/
+
+RUN ./config --openssldir=/usr/local --prefix=/usr/local && make && make install
+
 FROM build AS build-readline
 
 RUN wget -O - -q https://git.savannah.gnu.org/cgit/readline.git/snapshot/readline-8.2.tar.gz | tar -C /root/ -o -v -x -z
@@ -40,10 +48,20 @@ WORKDIR /root/readline-8.2/
 
 RUN ./configure --prefix=/usr/local && make && make install
 
+FROM build AS build-zlib
+
+RUN wget -O - -q https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz | tar -C /root/ -o -v -x -z
+
+WORKDIR /root/zlib-1.2.13/
+
+RUN ./configure --prefix=/usr/local && make && make install
+
 FROM build AS build-php
 
 COPY --from=build-ncurses /usr/local/ /usr/local/
+COPY --from=build-openssl /usr/local/ /usr/local/
 COPY --from=build-readline /usr/local/ /usr/local/
+COPY --from=build-zlib /usr/local/ /usr/local/
 
 RUN wget -O - -q https://www.php.net/distributions/php-5.6.40.tar.gz | tar -C /root/ -o -v -x -z
 
@@ -52,10 +70,17 @@ WORKDIR /root/php-5.6.40/
 RUN ./configure \
     --disable-all \
     --disable-cgi \
+    --enable-filter \
+    --enable-hash \
+    --enable-json \
+    --enable-mbstring \
+    --enable-phar \
     --prefix=/usr/local \
     --with-config-file-path=/usr/local/etc \
     --with-config-file-scan-dir=/usr/local/etc/ext \
-    --with-readline
+    --with-readline \
+    --with-openssl \
+    --with-zlib
 
 RUN make -j 4
 
@@ -76,6 +101,8 @@ RUN make install-cli
 COPY --chmod=644 --chown=root:root /usr/local/etc/php.ini /usr/local/etc/php.ini
 
 RUN mkdir -m 755 -v /usr/local/etc/ext
+
+RUN wget -O - -q https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/local/bin/
 
 FROM base AS main
 
