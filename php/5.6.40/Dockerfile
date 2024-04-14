@@ -87,6 +87,7 @@ RUN ./configure \
     --enable-json \
     --enable-mbstring \
     --enable-phar \
+    --enable-zip \
     --prefix=/usr/local \
     --with-config-file-path=/usr/local/etc \
     --with-config-file-scan-dir=/usr/local/etc/ext \
@@ -95,7 +96,7 @@ RUN ./configure \
     --with-openssl \
     --with-zlib
 
-RUN make
+RUN make -j 8 # FIX: Remove this.
 
 FROM build AS install-php
 
