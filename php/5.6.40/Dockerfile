@@ -24,6 +24,14 @@ RUN apt-get install -y \
     build-essential \
     wget
 
+FROM build AS build-libxml2
+
+RUN wget -O - -q https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.4.tar.xz | tar -C /root/ -J -o -v -x
+
+WORKDIR /root/libxml2-2.9.4/
+
+RUN ./configure --prefix=/usr/local && make && make install
+
 FROM build AS build-ncurses
 
 RUN wget -O - -q https://github.com/mirror/ncurses/archive/refs/tags/v6.4.tar.gz | tar -C /root/ -o -v -x -z
@@ -69,7 +77,10 @@ RUN ./configure --prefix=/usr/local --with-ssl --with-zlib && make && make insta
 
 FROM build AS build-php
 
+ARG LD_LIBRARY_PATH="/usr/local/lib"
+
 COPY --from=build-curl /usr/local/ /usr/local/
+COPY --from=build-libxml2 /usr/local/ /usr/local/
 COPY --from=build-ncurses /usr/local/ /usr/local/
 COPY --from=build-openssl /usr/local/ /usr/local/
 COPY --from=build-readline /usr/local/ /usr/local/
@@ -85,15 +96,19 @@ RUN ./configure \
     --enable-filter \
     --enable-hash \
     --enable-json \
+    --enable-libxml \
     --enable-mbstring \
     --enable-phar \
+    --enable-xml \
     --enable-zip \
     --prefix=/usr/local \
     --with-config-file-path=/usr/local/etc \
     --with-config-file-scan-dir=/usr/local/etc/ext \
     --with-curl \
     --with-readline \
+    --with-libxml-dir=/usr/local \
     --with-openssl \
+    --with-pear \
     --with-zlib
 
 RUN make -j 8 # FIX: Remove this.
@@ -102,18 +117,21 @@ FROM build AS install-php
 
 COPY --from=build-php /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so.4.4.0
 COPY --from=build-php /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8.2
+COPY --from=build-php /usr/local/lib/libxml2.so.2.9.4 /usr/local/lib/libxml2.so.2.9.4
 
 RUN ln -s -v /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so.4 \
-    && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8
+    && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8 \
+    && ln -s -v /usr/local/lib/libxml2.so.2.9.4 /usr/local/lib/libxml2.so.2
 
 RUN ln -s -v /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so \
-    && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so
+    && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so \
+    && ln -s -v /usr/local/lib/libxml2.so.2.9.4 /usr/local/lib/libxml2.so
 
 COPY --from=build-php /root/php-5.6.40/ /root/php-5.6.40/
 
 WORKDIR /root/php-5.6.40/
 
-RUN make install-cli
+RUN make install
 
 COPY --chmod=644 --chown=root:root /usr/local/etc/php.ini /usr/local/etc/php.ini
 
@@ -123,7 +141,10 @@ RUN wget -O - -q https://getcomposer.org/installer | php -- --filename=composer 
 
 FROM base AS main
 
-COPY --from=install-php /usr/local/ /usr/local/
+COPY --from=install-php /usr/local/bin/composer /usr/local/bin/composer
+COPY --from=install-php /usr/local/bin/php /usr/local/bin/php
+COPY --from=install-php /usr/local/etc/ /usr/local/etc/
+COPY --from=install-php /usr/local/lib/ /usr/local/lib/
 
 USER ilyabakhlinlebedev:administrator
 
