@@ -113,7 +113,7 @@ RUN ./configure \
 
 RUN make
 
-FROM build AS install-php
+FROM build AS install
 
 COPY --from=build-php /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so.4.4.0
 COPY --from=build-php /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so.8.2
@@ -127,22 +127,29 @@ RUN ln -s -v /usr/local/lib/libcurl.so.4.4.0 /usr/local/lib/libcurl.so \
     && ln -s -v /usr/local/lib/libreadline.so.8.2 /usr/local/lib/libreadline.so \
     && ln -s -v /usr/local/lib/libxml2.so.2.9.4 /usr/local/lib/libxml2.so
 
+COPY --chmod=644 --chown=root:root /usr/local/etc/php.ini /usr/local/etc/php.ini
+
+RUN wget -O /usr/local/share/ca-certificates/cacert.pem https://curl.se/ca/cacert.pem
+
 COPY --from=build-php /root/php-5.6.40/ /root/php-5.6.40/
+
+FROM install AS install-php-extensions
 
 WORKDIR /root/php-5.6.40/
 
-RUN make install
+RUN make install && pecl channel-update pecl.php.net
 
-COPY --chmod=644 --chown=root:root /usr/local/etc/php.ini /usr/local/etc/php.ini
+FROM install AS install-php
 
-RUN mkdir -m 755 -v /usr/local/etc/ext
+WORKDIR /root/php-5.6.40/
+
+RUN make install-cli
 
 RUN wget -O - -q https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/local/bin/
 
 FROM base AS main
 
-COPY --from=install-php /usr/local/bin/composer /usr/local/bin/composer
-COPY --from=install-php /usr/local/bin/php /usr/local/bin/php
+COPY --from=install-php /usr/local/bin/ /usr/local/bin/
 COPY --from=install-php /usr/local/etc/ /usr/local/etc/
 COPY --from=install-php /usr/local/lib/ /usr/local/lib/
 
