@@ -111,7 +111,7 @@ RUN ./configure \
     --with-pear \
     --with-zlib
 
-RUN make -j 8 # FIX: Remove this.
+RUN make
 
 FROM build AS install-php
 
