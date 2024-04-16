@@ -17,7 +17,11 @@ RUN apt-get update \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
     && groupadd -g 1000 administrator \
-    && useradd -c "Ilya Bakhlin Lebedev" -d /home/ilyabakhlinlebedev -g administrator -m -s /bin/bash -u 1000 ilyabakhlinlebedev
+    && useradd -c "Ilya Bakhlin Lebedev" -d /home/ilyabakhlinlebedev -g administrator -m -s /bin/bash -u 1000 ilyabakhlinlebedev \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries/variable \
+    && chown -R -v ilyabakhlinlebedev:administrator /home/ilyabakhlinlebedev/
 
 FROM base AS build
 
