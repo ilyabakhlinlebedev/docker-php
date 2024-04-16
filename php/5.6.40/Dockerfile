@@ -12,6 +12,7 @@ COPY --chmod=644 --chown=root:root /etc/apt/sources.list.d/debian-security.sourc
 RUN apt-get update \
     && apt-get -y upgrade \
     && apt-get -y dist-upgrade \
+    && apt-get --no-install-recommends -y install 7zip unzip \
     && apt-get clean \
     && apt-get -y autoclean \
     && apt-get -y autoremove \
