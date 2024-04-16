@@ -94,13 +94,16 @@ WORKDIR /root/php-5.6.40/
 RUN ./configure \
     --disable-all \
     --disable-cgi \
+    --enable-dom \
     --enable-filter \
     --enable-hash \
     --enable-json \
     --enable-libxml \
     --enable-mbstring \
     --enable-phar \
+    --enable-tokenizer \
     --enable-xml \
+    --enable-xmlwriter \
     --enable-zip \
     --prefix=/usr/local \
     --with-config-file-path=/usr/local/etc \
