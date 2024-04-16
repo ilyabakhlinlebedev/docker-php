@@ -21,6 +21,7 @@ RUN apt-get update \
 FROM base AS build
 
 RUN apt-get install -y \
+    autoconf \
     build-essential \
     wget
 
@@ -103,7 +104,7 @@ RUN ./configure \
     --enable-zip \
     --prefix=/usr/local \
     --with-config-file-path=/usr/local/etc \
-    --with-config-file-scan-dir=/usr/local/etc/ext \
+    --with-config-file-scan-dir=/usr/local/etc/php \
     --with-curl \
     --with-readline \
     --with-libxml-dir=/usr/local \
@@ -133,11 +134,17 @@ RUN wget -O /usr/local/share/ca-certificates/cacert.pem https://curl.se/ca/cacer
 
 COPY --from=build-php /root/php-5.6.40/ /root/php-5.6.40/
 
+RUN mkdir -m 755 -v /usr/local/etc/php
+
 FROM install AS install-php-extensions
 
 WORKDIR /root/php-5.6.40/
 
 RUN make install && pecl channel-update pecl.php.net
+
+FROM install-php-extensions AS install-php-extensions-xdebug
+
+RUN pecl install xdebug-2.5.5
 
 FROM install AS install-php
 
@@ -147,11 +154,16 @@ RUN make install-cli
 
 RUN wget -O - -q https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/local/bin/
 
+COPY --from=install-php-extensions-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20131226/xdebug.so /usr/local/include/xdebug.so
+
 FROM base AS main
 
 COPY --from=install-php /usr/local/bin/ /usr/local/bin/
 COPY --from=install-php /usr/local/etc/ /usr/local/etc/
+COPY --from=install-php /usr/local/include/ /usr/local/include/
 COPY --from=install-php /usr/local/lib/ /usr/local/lib/
+
+COPY --chmod=644 --chown=root:root /usr/local/etc/php/xdebug.ini /usr/local/etc/php/xdebug.ini
 
 USER ilyabakhlinlebedev:administrator
 
