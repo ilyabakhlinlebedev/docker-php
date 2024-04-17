@@ -171,6 +171,7 @@ COPY --from=install-php /usr/local/bin/ /usr/local/bin/
 COPY --from=install-php /usr/local/etc/ /usr/local/etc/
 COPY --from=install-php /usr/local/include/ /usr/local/include/
 COPY --from=install-php /usr/local/lib/ /usr/local/lib/
+COPY --from=install-php /usr/local/share/ /usr/local/share/
 
 COPY --chmod=644 --chown=root:root /usr/local/etc/php/xdebug.ini /usr/local/etc/php/xdebug.ini
 
