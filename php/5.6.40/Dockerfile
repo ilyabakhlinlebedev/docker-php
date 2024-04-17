@@ -121,7 +121,7 @@ RUN ./configure \
     --with-pear \
     --with-zlib
 
-RUN make
+RUN make -j $(nproc)
 
 FROM build AS install
 
