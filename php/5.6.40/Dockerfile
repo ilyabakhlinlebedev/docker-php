@@ -18,6 +18,7 @@ RUN apt-get update \
     && apt-get -y autoremove \
     && groupadd -g 1000 administrator \
     && useradd -c "Ilya Bakhlin Lebedev" -d /home/ilyabakhlinlebedev -g administrator -m -s /bin/bash -u 1000 ilyabakhlinlebedev \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/.composer \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries \
@@ -161,12 +162,15 @@ WORKDIR /root/php-5.6.40/
 
 RUN make install-cli
 
-RUN wget -O - -q https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/local/bin/
+RUN wget -O - -q https://getcomposer.org/installer | php -- --filename=composer --install-dir=/usr/local/bin/ \
+    && wget -O /home/ilyabakhlinlebedev/.composer/keys.dev.pub https://composer.github.io/snapshots.pub \
+    && wget -O /home/ilyabakhlinlebedev/.composer/keys.tags.pub https://composer.github.io/releases.pub
 
 COPY --from=install-php-extensions-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20131226/xdebug.so /usr/local/include/xdebug.so
 
 FROM base AS main
 
+COPY --from=install-php /home/ilyabakhlinlebedev/.composer/ /home/ilyabakhlinlebedev/.composer/
 COPY --from=install-php /usr/local/bin/ /usr/local/bin/
 COPY --from=install-php /usr/local/etc/ /usr/local/etc/
 COPY --from=install-php /usr/local/include/ /usr/local/include/
