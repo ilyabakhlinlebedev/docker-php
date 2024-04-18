@@ -21,8 +21,9 @@ RUN apt-get update \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/.composer \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax \
-    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries \
-    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries/variable \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-curl \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-variable \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-url \
     && chown -R -v ilyabakhlinlebedev:administrator /home/ilyabakhlinlebedev/
 
 FROM base AS build
