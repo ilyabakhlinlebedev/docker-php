@@ -20,10 +20,17 @@ RUN apt-get update \
     && useradd -c "Ilya Bakhlin Lebedev" -d /home/ilyabakhlinlebedev -g administrator -m -s /bin/bash -u 1000 ilyabakhlinlebedev \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/.composer \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/ilyabakhlinlebedev \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/ilyabakhlinlebedev/adventofcode \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/ilyabakhlinlebedev/beecrowd \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/ilyabakhlinlebedev/codingame \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/ilyabakhlinlebedev/hackerrank \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/ilyabakhlinlebedev/leetcode \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-curl \
-    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-variable \
     && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-url \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-libraries-variable \
+    && mkdir -m 755 -v /home/ilyabakhlinlebedev/GitHub/quorrax/php-rest-steam \
     && chown -R -v ilyabakhlinlebedev:administrator /home/ilyabakhlinlebedev/
 
 FROM base AS build
